@@ -10,8 +10,11 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private int length;
     private int screenHeight;
     private int moveLength;
-    private View moveView;
+    private MyImageView moveView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,17 +54,15 @@ public class MainActivity extends AppCompatActivity {
 
         myAdapter.setMyClickListener(new MyAdapter.MyClickListener() {
             @Override
-            public void onClick(View view, int y, int height) {
+            public void onClick(View view, int y, final int position) {
                 linearLayoutManager.setScrollEnabled(false);
-
-                moveView = view;
 
                 frameLayout.setVisibility(View.VISIBLE);
                 frameLayout.setAlpha(0f);
                 alphaAnimation(frameLayout, 0.0f, 1.0f, true);
                 FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) frameLayout.getLayoutParams();
-                params.topMargin = y + height + length;
-                params.height = screenHeight - height - length;
+                params.topMargin = y + view.getHeight() + length;
+                params.height = screenHeight - view.getHeight() - length;
 
                 int startY = 0;
                 int endY = 0;
@@ -71,7 +72,24 @@ public class MainActivity extends AppCompatActivity {
                     moveLength = endY;
                 }
 
-                translate(view, startY, endY);
+                ViewGroup decorView = (ViewGroup) getWindow().getDecorView();
+//                final ViewGroup content = (ViewGroup) decorView.findViewById(android.R.id.content);
+                MyImageView imageView = new MyImageView(MainActivity.this);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                imageView.setImageResource(R.mipmap.icon_bg_type_1);
+                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(view.getWidth(), view.getHeight());
+                layoutParams.topMargin = y + 2 * length;
+                decorView.addView(imageView, layoutParams);
+
+                moveView = imageView;
+
+                translate(imageView, startY, endY);
                 translate(frameLayout, startY, endY);
             }
         });
@@ -91,6 +109,12 @@ public class MainActivity extends AppCompatActivity {
             public void onAnimationEnd(Animator animation) {
                 if (view.getTranslationY() == 0f) {
                     alphaAnimation(frameLayout, 1.0f, 0.0f, false);
+                    final ViewGroup decorView = (ViewGroup) getWindow().getDecorView();
+                    for (int i = 0; i < decorView.getChildCount(); i++) {
+                        if (decorView.getChildAt(i) instanceof MyImageView) {
+                            decorView.removeView(decorView.getChildAt(i));
+                        }
+                    }
                 }
             }
 

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,16 +51,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView imageView;
+        private MyImageView imageView;
         private Button button;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            this.imageView = (ImageView) itemView.findViewById(R.id.image);
+            this.imageView = (MyImageView) itemView.findViewById(R.id.image);
             this.button = (Button) itemView.findViewById(R.id.btn);
         }
 
-        private void update(int position) {
+        private void update(final int position) {
             if (position == 1)
                 imageView.setImageResource(R.mipmap.icon_bg_type_1);
             else imageView.setImageResource(R.mipmap.ic_launcher);
@@ -70,7 +71,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                     itemView.getLocationOnScreen(location);
                     int y = location[1];
 
-                    myClickListener.onClick(imageView, y, imageView.getHeight());
+                    myClickListener.onClick(imageView, y, position);
+                }
+            });
+
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context, "" + position, Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -85,7 +93,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     }
 
     public interface MyClickListener {
-        void onClick(View view, int y, int height);
+        void onClick(View view, int y, int position);
     }
 
 }
